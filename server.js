@@ -1,18 +1,22 @@
-app.get("/", (req, res) => {
-  res.send("Lunar backend is running 🌙");
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
+const express = require("express");
+const fetch = require("node-fetch");
+const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ HOME ROUTE (fixes Cannot GET /)
+app.get("/", (req, res) => {
+  res.send("Lunar backend running 🌙");
+});
+
+// ✅ CHAT ROUTE
 app.post("/chat", async (req, res) => {
   const { message, history = [] } = req.body;
 
   if (!message) {
-    return res.status(400).json({ error: "Message missing" });
+    return res.status(400).json({ error: "No message provided" });
   }
 
   try {
@@ -27,10 +31,7 @@ app.post("/chat", async (req, res) => {
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [
-            {
-              role: "system",
-              content: "You are a helpful, safe assistant like ChatGPT."
-            },
+            { role: "system", content: "You are Lunar, a helpful and safe AI assistant." },
             ...history,
             { role: "user", content: message }
           ],
@@ -40,12 +41,18 @@ app.post("/chat", async (req, res) => {
     );
 
     const data = await response.json();
-    res.json({ reply: data.choices[0].message.content });
-  } catch {
-    res.status(500).json({ error: "AI error" });
+
+    res.json({
+      reply: data.choices?.[0]?.message?.content || "Lunar had no response."
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Lunar backend error" });
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+// ✅ PORT FIX (important for Render)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Lunar backend running on port ${PORT}`);
 });
