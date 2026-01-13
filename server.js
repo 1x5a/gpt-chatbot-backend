@@ -1,3 +1,7 @@
+app.get("/", (req, res) => {
+  res.send("Lunar backend is running 🌙");
+});
+
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
